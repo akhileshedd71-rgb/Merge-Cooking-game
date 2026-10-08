@@ -1,0 +1,8 @@
+{
+  "name": "little-world-kitchen-browser-checks",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Optional browser validation for the Godot web export",
+  "scripts": {"smoke": "node browser_smoke.cjs"},
+  "devDependencies": {"playwright": "1.58.2"}
+}
