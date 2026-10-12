@@ -2,6 +2,33 @@
 
 An original, cozy portrait game built in **Godot 4.6.3** with GDScript. Merge fresh ingredients, cook little dishes, serve your neighbors, and give a café a new beginning. Designed for touch, with mouse support for development and a browser preview.
 
+## Screenshots
+
+Captured from the playable **0.2.0 browser build** in portrait mode. Select an image to view it at full size.
+
+<table>
+  <tr>
+    <th>Merge & serve</th>
+    <th>Learn with Lea</th>
+    <th>Discover recipes</th>
+  </tr>
+  <tr>
+    <td><a href="docs/screenshots/kitchen.png"><img src="docs/screenshots/kitchen.png" width="240" alt="Portrait merge board with ingredient generators, food tiles, and customer orders"></a></td>
+    <td><a href="docs/screenshots/tutorial.png"><img src="docs/screenshots/tutorial.png" width="240" alt="Lea's interactive tutorial highlighting generators and explaining how to create ingredients"></a></td>
+    <td><a href="docs/screenshots/recipes.png"><img src="docs/screenshots/recipes.png" width="240" alt="Recipe notebook showing salmon bowl, crab cakes, lobster bisque, and caviar toast"></a></td>
+  </tr>
+  <tr>
+    <th>Make it your café</th>
+    <th>Explore the world</th>
+    <th>Grow as a chef</th>
+  </tr>
+  <tr>
+    <td><a href="docs/screenshots/bistro.png"><img src="docs/screenshots/bistro.png" width="240" alt="New York bistro with an isometric café illustration and renovation choices"></a></td>
+    <td><a href="docs/screenshots/travel.png"><img src="docs/screenshots/travel.png" width="240" alt="Travel passport with illustrated destinations for New York, Bangkok, and Tokyo"></a></td>
+    <td><a href="docs/screenshots/chef-levels.png"><img src="docs/screenshots/chef-levels.png" width="240" alt="Chef progression screen showing experience, level rewards, and supplier unlocks"></a></td>
+  </tr>
+</table>
+
 ## Play
 
 1. Tap a fruit basket, garden crate, or pantry on the board to create an ingredient. Each costs one energy.
