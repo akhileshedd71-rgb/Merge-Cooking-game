@@ -19,6 +19,8 @@ func _run() -> void:
 	game.state.changed.disconnect(game._state_changed)
 	game.state.changed.connect(func(): game.pending_refresh = true)
 	game.state.new_game(53)
+	game.state.skip_tutorial()
+	game._close_modal()
 	await _settle()
 	_expect(_tiles().size() == 63, "Scene creates all 63 board controls")
 	var energy_before: int = game.state.energy
@@ -41,7 +43,7 @@ func _run() -> void:
 	game.state.jobs[0].ready_at = Time.get_unix_time_from_system() - 1.0
 	game.pending_refresh = true
 	await _settle()
-	await _click(_button_prefix("Collect Banana smoothie"))
+	await _click(_button_prefix("Collect dish"))
 	_expect(game.state.jobs.is_empty() and game.state.board.has("smoothie"), "Station collection puts the cooked dish on the board")
 	game._switch_tab("Kitchen")
 	await _settle()
@@ -65,7 +67,7 @@ func _run() -> void:
 	var locked_count: int = 0
 	for button: Button in _buttons(game):
 		if button.text == "Locked" and button.disabled: locked_count += 1
-	_expect(locked_count == 3, "Future destinations are visibly disabled")
+	_expect(locked_count == 7, "Future destinations are visibly disabled")
 	game.queue_free()
 	await process_frame
 	print("Kitchen scene: %d checks, %d failures" % [checks, failures])

@@ -4,3 +4,8 @@ build/
 *.tmp
 *.log
 tools/node_modules/
+
+__pycache__/
+*.py[cod]
+core
+core.*

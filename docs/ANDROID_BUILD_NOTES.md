@@ -64,7 +64,7 @@ helpful message, even when the SDK and keystore are correct.
 ## Verified artifact
 
 - Application: **Little World Kitchen**, package `com.littleworldkitchen.game`.
-- Version: `0.1.0`, version code `1`.
+- Version: `0.1.0`, version code `2`.
 - Minimum Android SDK: 24 (Android 7.0); target SDK: 36 (Android 16).
 - Native architectures: `arm64-v8a` and `x86_64`.
 - Development signing: RSA 2048, standard Android debug certificate.
@@ -73,9 +73,9 @@ helpful message, even when the SDK and keystore are correct.
   CRC checks: passed.
 - Bundled content check: branded app icon, compiled game scripts, all 64 room
   variants present.
-- Validated APK size: 59,993,229 bytes.
+- Validated APK size: 60,356,304 bytes.
 - Validated APK SHA-256:
-  `5e5ec56c6161eab74e2f96dd7448cb83d52f29959a96b312eeae61ea6fc5648b`.
+  `605f2eb76aa36d773ccbae564b3566ecbae58c91468075e075410f759a086f9b`.
 
 Hashes change when the game is rebuilt; the value above identifies the artifact
 created during this implementation.

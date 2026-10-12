@@ -1,23 +1,39 @@
-# Little World Kitchen: first playable design
+# Little World Kitchen 0.2 — the flavor journey
 
-The mood is a sunny neighborhood café: warm cream, botanical green, clay red, soft gold, rounded food illustrations, spacious controls, and a quiet sense of travel. The source-game references inform the genre's interactions. This game's name, visual composition, art, and dialogue are its own.
-
-## Loop
+The game combines a portrait merge board with a relaxed cooking and restaurant loop:
 
 `Generate → Merge → Cook → Serve → Renovate → Travel`
 
-The board uses seven columns and nine rows so all 63 cells fit a portrait phone. Two matching ingredients move along a linear chain; unmatched movable items swap. A successful merge clears orthogonally adjacent dusty cells. Three fixed generators supply fruit, vegetables, and pantry goods for one energy each. Energy recovers to 100, one point every 45 seconds. Ten off-board storage slots provide breathing room.
+## Food and travel
 
-Seven appliances turn suitable ingredients into nine dishes. Cooking timers are intentionally short (8–18 seconds) for this first playable version. A boost removes five seconds; completed food waits until the player has room to collect it. Orders reward coins, stars, and experience. There is no failure clock.
+There are **30 ingredients in five six-tier chains** and **32 cooked dishes**. The original orchard, garden, and pantry suppliers remain on the board. The fish market opens at chef level 3, and the patisserie opens at level 5; both are available through the market opened by tapping the coin counter. All suppliers use energy. Higher ingredients come from merging, never from purchases.
 
-Each café has three renovation steps—floor, tables, and decor—with sage, sunshine, and rose style choices. Completing its renovations unlocks the next city: New York, Bangkok, Tokyo, and Paris. All cities share the underlying board and recipe system, with their own story and renovation state. This keeps the first version focused on a complete progression loop.
+The catalog lives in `scripts/catalog.gd`. Each recipe identifies an input, an optional second ingredient, a station, cooking time, and minimum chef level. All ingredients are consumed together only when the complete recipe can start. Original recipes remain available at level 1. The expanded recipes unlock through level 8, and generated orders only ask for unlocked recipes. Timers last 8–26 seconds, with no spoiled food or expiring orders.
 
-## Deliberate first-version boundaries
+New York, Bangkok, Tokyo, Paris, Rome, Mexico City, Istanbul, and Seoul each have a story, a signature dish, a hand-illustrated postcard, and independent restaurant renovation progress. Finishing the three details of a restaurant unlocks the next city. Floor, table, and décor selections retain their individual styles across all 64 visual combinations.
 
-- One board and a compact set of ingredient chains; more content can be added to `KitchenState` data.
-- Local saves only; no backend or cross-device synchronization.
-- Daily rewards and decorative currency, without purchases or advertisements.
-- Short narrative introductions; no branching dialogue or live events.
-- Touch and mouse interactions; dedicated controller and screen-reader interfaces remain future work.
+## Progression and economy
 
-The next production milestones are native-device playtesting, economy tuning, deeper city-specific recipes and art, accessibility, localization, and reliable save migrations before monetization is considered.
+Chef levels run from 1 through 20, at 100 XP per level. Merging, cooking, and serving grant XP. The chef portrait opens the level roadmap and ten goals. Each new level has a one-time claim of `25 × level` coins, 10 energy, and a cooking boost. Goals reward coins and renovation stars; claims persist across saves.
+
+Coins now buy 30 energy (120 coins), three cooking boosts (75 coins), or one extra pantry slot (250 coins). The pantry starts with ten slots and expands to twenty. Full energy and full storage capacity reject purchases without spending. An ingredient's detail panel also allows selling it for `2 × tier` coins to free space. Generators cannot be sold. No payment, ad, premium currency purchase, or external service is involved.
+
+## Guided first session
+
+Lea's six-step tutorial advances from real gameplay actions: generate, merge, start a recipe, collect it, serve a guest, and renovate. It highlights useful tiles and supplies a contextual “Show me” action. The player can skip or replay it from Guide & settings. It resumes after closing the game, including active cooking jobs. The first completion grants 50 coins, one star, and ten energy; replay never repeats the reward. Returning version-1 players continue without an interrupting welcome screen.
+
+## Interaction and feedback
+
+- Tap matching ingredients to merge, or tap an empty tile to move. Tapping a different ingredient changes selection; dragging still supports swaps.
+- Hint highlights an available pair. The detail panel shows the next merge result and cooking/storage/sale choices.
+- Cooking-ready badges appear on the Cook tab even while exploring another screen.
+- The notebook filters all, ready-to-cook, and unlocked recipes, and shows all ingredient chains.
+- Pantry, recipe, goal, and travel screens preserve their scroll position.
+- Merge pops, sparkles, soft synthesized sounds, and short screen fades supply feedback. Sound and gentle-motion preferences persist.
+- Notifications stay above the play area. Touch devices do not show desktop hover tooltips.
+
+## Persistence and boundaries
+
+Save schema 2 migrates schema 1 while preserving the board, storage, resources, active orders, jobs, discoveries, and restaurant styles. Newly added destinations and progression fields receive defaults. Unknown versions and malformed saves are rejected without mutating the currently loaded state. Tests include an actual version-1 fixture produced by the original Git revision.
+
+This remains a local, offline game. Cloud synchronization, native iOS export, app-store signing, physical-device performance tests, and monetization are outside this version.

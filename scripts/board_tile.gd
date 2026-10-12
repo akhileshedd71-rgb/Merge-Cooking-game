@@ -70,6 +70,10 @@ func _is_generator() -> bool:
 
 
 func _update_description() -> void:
+	# Emulated touch must not leave a desktop hover tooltip over the board.
+	if DisplayServer.is_touchscreen_available():
+		tooltip_text = ""
+		return
 	if item_id.is_empty():
 		tooltip_text = "Empty space · move an ingredient here"
 	elif item_id == "locked":

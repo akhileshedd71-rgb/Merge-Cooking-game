@@ -1,4 +1,4 @@
-# Little World Kitchen
+# Little World Kitchen · 0.2.0
 
 An original, cozy portrait game built in **Godot 4.6.3** with GDScript. Merge fresh ingredients, cook little dishes, serve your neighbors, and give a café a new beginning. Designed for touch, with mouse support for development and a browser preview.
 
@@ -10,7 +10,11 @@ An original, cozy portrait game built in **Godot 4.6.3** with GDScript. Merge fr
 4. Serve ready customer orders to earn coins, stars, and experience.
 5. Use stars to renovate the café, choose a style, and unlock the next city.
 
-The board has 63 cells (7 columns × 9 rows), three ingredient chains, seven concurrent orders, and ten storage slots. Recipes, travel, café renovation, daily gifts, save/resume, sound controls, and an in-game guide are included. New York, Bangkok, Tokyo, and Paris each have a story and café progress. Energy restores over time; there are no ads, purchases, accounts, or monetization SDKs.
+The board has **63 cells**, **30 ingredients in five merge chains**, **32 recipes**, seven cooking stations, seven concurrent orders, and storage that expands from ten to twenty slots. Explore **eight cities** from New York to Seoul, grow through **20 chef levels**, and earn rewards from ten goals.
+
+Lea’s interactive six-step tutorial teaches the real game and resumes where you left off. Tap your chef portrait for rewards and the guide, the coin counter for supplies, or Book for recipe filters and ingredient chains. The fish market opens at level 3 and the patisserie at level 5. Existing saves migrate automatically.
+
+Energy restores over time. Daily gifts, cooking-ready badges, merge hints, original food and postcard art, sound and gentle-motion controls, and local save/resume are included. There are no ads, real-money purchases, accounts, or monetization SDKs. See [what’s new](docs/CHANGELOG.md) and the [game design](docs/DESIGN.md).
 
 This is a playable first version. Native store publishing, production balancing, localization, cloud saves, and device-fleet testing remain future work. The screenshots supplied for the brief were references for the genre; this project's branding, interface, and artwork are original.
 
@@ -75,7 +79,7 @@ Start the preview server first. The script uses `/usr/bin/chromium` when availab
 | Location | Purpose |
 | --- | --- |
 | `project.godot`, `main.tscn` | Portrait viewport, renderer, and main scene |
-| `scripts/game_state.gd` | Board, recipes, orders, economy, travel, and persistence |
+| `scripts/catalog.gd`, `scripts/game_state.gd` | Food catalog, board, tutorial, progression, economy, travel, and migration |
 | `scripts/` | Runtime interface, interactions, and audio |
 | `assets/` | Original art and licensed fonts |
 | `tests/` | Headless gameplay validation |

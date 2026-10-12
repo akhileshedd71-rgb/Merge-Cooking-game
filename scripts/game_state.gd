@@ -4,43 +4,22 @@ extends RefCounted
 
 signal changed
 signal feedback(message: String)
+signal tutorial_finished
 
 const COLS: int = 7
 const ROWS: int = 9
 const ENERGY_MAX: int = 100
 const INVENTORY_MAX: int = 10
 const ENERGY_INTERVAL: float = 45.0
-const SAVE_VERSION: int = 1
+const SAVE_VERSION: int = 2
+const MAX_LEVEL: int = 20
+const CHAINS = preload("res://scripts/catalog.gd").CHAINS
+const GOALS = preload("res://scripts/catalog.gd").GOALS
 const PARTS: Array[String] = ["floor", "tables", "decor"]
 const RENOVATION_COSTS: Dictionary = {"floor": 2, "tables": 3, "decor": 4}
 const STYLES: Array[String] = ["sage", "sunshine", "rose"]
 
-const ITEMS: Dictionary = {
-	"produce_fruit": {"name": "Fruit basket", "chain": "generator", "tier": 1, "next": "", "icon": "produce_fruit", "description": "Tap to grow cherries and strawberries. Costs 1 energy."},
-	"produce_veg": {"name": "Garden crate", "chain": "generator", "tier": 1, "next": "", "icon": "produce_veg", "description": "Tap for tomatoes and carrots. Costs 1 energy."},
-	"produce_pantry": {"name": "Pantry", "chain": "generator", "tier": 1, "next": "", "icon": "produce_pantry", "description": "Tap for flour and bread. Costs 1 energy."},
-	"cherry": {"name": "Cherries", "chain": "fruit", "tier": 1, "next": "strawberry", "icon": "cherry"},
-	"strawberry": {"name": "Strawberry", "chain": "fruit", "tier": 2, "next": "banana", "icon": "strawberry"},
-	"banana": {"name": "Banana", "chain": "fruit", "tier": 3, "next": "pineapple", "icon": "banana"},
-	"pineapple": {"name": "Pineapple", "chain": "fruit", "tier": 4, "next": "", "icon": "pineapple"},
-	"tomato": {"name": "Tomato", "chain": "veg", "tier": 1, "next": "carrot", "icon": "tomato"},
-	"carrot": {"name": "Carrot", "chain": "veg", "tier": 2, "next": "broccoli", "icon": "carrot"},
-	"broccoli": {"name": "Broccoli", "chain": "veg", "tier": 3, "next": "avocado", "icon": "broccoli"},
-	"avocado": {"name": "Avocado", "chain": "veg", "tier": 4, "next": "", "icon": "avocado"},
-	"flour": {"name": "Flour", "chain": "pantry", "tier": 1, "next": "bread", "icon": "flour"},
-	"bread": {"name": "Bread", "chain": "pantry", "tier": 2, "next": "cheese", "icon": "bread"},
-	"cheese": {"name": "Cheese", "chain": "pantry", "tier": 3, "next": "egg", "icon": "cheese"},
-	"egg": {"name": "Eggs", "chain": "pantry", "tier": 4, "next": "", "icon": "egg"},
-	"smoothie": {"name": "Banana smoothie", "chain": "dish", "tier": 5, "next": "", "icon": "smoothie"},
-	"salad": {"name": "Garden salad", "chain": "dish", "tier": 5, "next": "", "icon": "salad"},
-	"toast": {"name": "Golden toast", "chain": "dish", "tier": 5, "next": "", "icon": "toast"},
-	"benedict": {"name": "Eggs Benedict", "chain": "dish", "tier": 5, "next": "", "icon": "benedict"},
-	"soup": {"name": "Sunshine soup", "chain": "dish", "tier": 5, "next": "", "icon": "soup"},
-	"sushi": {"name": "Avocado sushi", "chain": "dish", "tier": 5, "next": "", "icon": "sushi"},
-	"ramen": {"name": "Creamy ramen", "chain": "dish", "tier": 5, "next": "", "icon": "ramen"},
-	"macaron": {"name": "Dreamy macarons", "chain": "dish", "tier": 5, "next": "", "icon": "macaron"},
-	"tropical": {"name": "Tropical fizz", "chain": "dish", "tier": 5, "next": "", "icon": "tropical"},
-}
+const ITEMS: Dictionary = preload("res://scripts/catalog.gd").ITEMS
 
 const STATIONS: Dictionary = {
 	"pan": {"name": "Frying pan", "description": "A little sizzle, a lot of happiness."},
@@ -51,23 +30,8 @@ const STATIONS: Dictionary = {
 	"grill": {"name": "Grill", "description": "Give your ingredients a warm welcome."},
 	"shaker": {"name": "Shaker", "description": "Shake up a little sunshine."},
 }
-const RECIPES: Array[Dictionary] = [
-	{"id": "smoothie", "name": "Banana smoothie", "input": "banana", "station": "blender", "out": "smoothie", "duration": 10.0},
-	{"id": "salad", "name": "Garden salad", "input": "broccoli", "station": "steamer", "out": "salad", "duration": 12.0},
-	{"id": "toast", "name": "Golden toast", "input": "bread", "station": "oven", "out": "toast", "duration": 8.0},
-	{"id": "benedict", "name": "Eggs Benedict", "input": "egg", "station": "pan", "out": "benedict", "duration": 16.0},
-	{"id": "soup", "name": "Sunshine soup", "input": "carrot", "station": "pot", "out": "soup", "duration": 12.0},
-	{"id": "sushi", "name": "Avocado sushi", "input": "avocado", "station": "grill", "out": "sushi", "duration": 18.0},
-	{"id": "ramen", "name": "Creamy ramen", "input": "cheese", "station": "pot", "out": "ramen", "duration": 16.0},
-	{"id": "macaron", "name": "Dreamy macarons", "input": "flour", "station": "oven", "out": "macaron", "duration": 18.0},
-	{"id": "tropical", "name": "Tropical fizz", "input": "pineapple", "station": "shaker", "out": "tropical", "duration": 10.0},
-]
-const CITIES: Array[Dictionary] = [
-	{"name": "New York", "country": "United States", "subtitle": "The little corner café", "signature": "benedict", "story": "Coach Miles has a big heart and a tiny café. Let's make it the neighborhood's favorite brunch spot!"},
-	{"name": "Bangkok", "country": "Thailand", "subtitle": "A taste of sunshine", "signature": "soup", "story": "Mali's riverside kitchen is full of stories. A bright new dining room will give them a place to shine."},
-	{"name": "Tokyo", "country": "Japan", "subtitle": "Small plates, big dreams", "signature": "sushi", "story": "Haru has perfected the recipes. Now we're helping turn a quiet corner into a warm neighborhood kitchen."},
-	{"name": "Paris", "country": "France", "subtitle": "A little joie de vivre", "signature": "macaron", "story": "Camille believes every beautiful day starts with a pastry. Let's create a bistro as delightful as her macarons."},
-]
+const RECIPES: Array[Dictionary] = preload("res://scripts/catalog.gd").RECIPES
+const CITIES: Array[Dictionary] = preload("res://scripts/catalog.gd").CITIES
 const CUSTOMERS: Array[String] = ["Oliver", "Maya", "Theo", "Sophie", "Miles", "Amara", "Leo", "Mali", "Haru", "Camille"]
 
 var board: Array[String] = []
@@ -87,6 +51,12 @@ var energy_updated_at: float = 0.0
 var total_merges: int = 0
 var total_orders: int = 0
 var discovered: Array[String] = []
+var inventory_capacity: int = 10
+var total_cooked: int = 0
+var claimed_levels: Array[int] = [1]
+var claimed_goals: Array[String] = []
+var tutorial_step: int = 0
+var tutorial_rewarded: bool = false
 var _order_cursor: int = 0
 var _next_order_id: int = 1
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -120,7 +90,14 @@ func new_game(seed_value: int = 0) -> void:
 	xp = 0
 	boosts = 3
 	city_index = 0
-	renovations = {"0": {}, "1": {}, "2": {}, "3": {}}
+	renovations = {}
+	for i in CITIES.size(): renovations[str(i)] = {}
+	inventory_capacity = 10
+	total_cooked = 0
+	claimed_levels.assign([1])
+	claimed_goals.clear()
+	tutorial_step = 0
+	tutorial_rewarded = false
 	daily_claimed_at = 0
 	energy_updated_at = Time.get_unix_time_from_system()
 	total_merges = 0
@@ -144,7 +121,7 @@ func get_recipe(id: String) -> Dictionary:
 	return {}
 
 func get_level() -> int:
-	return 1 + int(xp / 100.0)
+	return mini(MAX_LEVEL, 1 + int(xp / 100.0))
 
 func get_unlocked_city() -> int:
 	for index: int in range(CITIES.size() - 1):
@@ -164,20 +141,25 @@ func can_move(index: int) -> bool:
 func generate(index: int) -> bool:
 	if not _valid_cell(index) or not ITEMS.has(board[index]) or ITEMS[board[index]]["chain"] != "generator":
 		return _fail("Tap one of the three ingredient baskets.")
+	return generate_from(board[index])
+
+func generate_from(source: String) -> bool:
+	var chain: Dictionary = {}
+	for entry in CHAINS:
+		if entry.generator == source: chain = entry
+	if chain.is_empty(): return _fail("Choose an ingredient supplier.")
+	if get_level() < int(chain.level): return _fail("This supplier opens at chef level %d." % int(chain.level))
 	tick()
-	if energy <= 0:
-		return _fail("A little rest! Energy recharges every 45 seconds.")
+	if energy <= 0: return _fail("Energy is resting. Visit the market or collect a daily gift.")
 	var empty: int = board.find("")
-	if empty < 0:
-		return _fail("Your kitchen is full. Merge, cook or store an ingredient.")
-	var choices: Dictionary = {"produce_fruit": ["cherry", "strawberry"], "produce_veg": ["tomato", "carrot"], "produce_pantry": ["flour", "bread"]}
-	var item: String = choices[board[index]][1 if _rng.randf() < 0.18 else 0]
-	if energy == ENERGY_MAX:
-		energy_updated_at = Time.get_unix_time_from_system()
+	if empty < 0: return _fail("Your board is full. Store, merge, cook, or sell an ingredient.")
+	var item: String = chain.items[1 if _rng.randf() < 0.18 else 0]
+	if energy == ENERGY_MAX: energy_updated_at = Time.get_unix_time_from_system()
 	energy -= 1
 	board[empty] = item
 	_discover(item)
-	_commit("Fresh %s!" % ITEMS[item]["name"].to_lower())
+	_tutorial_event("generate")
+	_commit("")
 	return true
 
 func move_or_merge(from: int, to: int) -> bool:
@@ -193,6 +175,7 @@ func move_or_merge(from: int, to: int) -> bool:
 		board[from] = ""
 		board[to] = upgraded
 		total_merges += 1
+		_tutorial_event("merge")
 		xp += 2
 		_discover(upgraded)
 		var cleared: int = _unlock_neighbors(to)
@@ -206,7 +189,7 @@ func move_or_merge(from: int, to: int) -> bool:
 func store_item(index: int) -> bool:
 	if not can_move(index):
 		return _fail("Choose an ingredient to tuck away.")
-	if inventory.size() >= INVENTORY_MAX:
+	if inventory.size() >= inventory_capacity:
 		return _fail("The pantry is full. Bring an ingredient back first.")
 	inventory.append(board[index])
 	board[index] = ""
@@ -228,10 +211,17 @@ func start_cooking(index: int, recipe_id: String) -> bool:
 	var recipe: Dictionary = get_recipe(recipe_id)
 	if recipe.is_empty() or not can_move(index) or board[index] != recipe["input"]:
 		return _fail("Pick the matching ingredient for this recipe.")
+	if get_level() < int(recipe.level): return _fail("Unlock this recipe at chef level %d." % int(recipe.level))
+	var extra_index: int = -1
+	if not str(recipe.extra).is_empty():
+		extra_index = board.find(recipe.extra)
+		if extra_index < 0 or extra_index == index: return _fail("Also needed: %s." % ITEMS[recipe.extra].name)
 	for job: Dictionary in jobs:
 		if job["station"] == recipe["station"]:
 			return _fail("That station is busy. Collect its dish first.")
 	board[index] = ""
+	if extra_index >= 0: board[extra_index] = ""
+	_tutorial_event("cook")
 	jobs.append({"recipe": recipe_id, "output": recipe["out"], "station": recipe["station"], "ready_at": Time.get_unix_time_from_system() + float(recipe["duration"])})
 	_commit("%s is on its way!" % recipe["name"])
 	return true
@@ -254,6 +244,8 @@ func collect_cooking(job_index: int) -> bool:
 	jobs.remove_at(job_index)
 	_discover(item)
 	xp += 5
+	total_cooked += 1
+	_tutorial_event("collect")
 	_commit("%s, made with love!" % ITEMS[item]["name"])
 	return true
 
@@ -276,6 +268,7 @@ func serve_order(index: int) -> bool:
 	stars += int(order["stars"])
 	xp += int(order["xp"])
 	total_orders += 1
+	_tutorial_event("serve")
 	orders[index] = _make_order(_next_order_item())
 	_commit("Merci, chef! +%d coins  +%d star" % [int(order["coins"]), int(order["stars"])])
 	return true
@@ -288,6 +281,7 @@ func renovate(part: String, style: String) -> bool:
 		if current[part] == style:
 			return false
 		current[part] = style
+		_tutorial_event("renovate")
 		_commit("A fresh new look. Redecorating is always free!")
 		return true
 	var cost: int = RENOVATION_COSTS[part]
@@ -295,8 +289,9 @@ func renovate(part: String, style: String) -> bool:
 		return _fail("Serve a few more guests to earn %d stars." % cost)
 	stars -= cost
 	current[part] = style
+	_tutorial_event("renovate")
 	if current.size() == PARTS.size():
-		_commit("A beautiful new beginning! Your next destination awaits." if city_index < CITIES.size() - 1 else "Four cities, countless happy memories. Keep cooking, chef!")
+		_commit("A beautiful new beginning! Your next destination awaits." if city_index < CITIES.size() - 1 else "Eight cities, countless happy memories. Keep cooking, chef!")
 	else:
 		_commit("One lovely detail makes all the difference.")
 	return true
@@ -359,6 +354,7 @@ func save_game(path: String = "user://kitchen_save.json") -> bool:
 		"energy_updated_at": energy_updated_at, "total_merges": total_merges, "total_orders": total_orders,
 		"discovered": discovered, "order_cursor": _order_cursor, "next_order_id": _next_order_id,
 		"rng_seed": str(_rng.seed), "rng_state": str(_rng.state),
+		"inventory_capacity": inventory_capacity, "total_cooked": total_cooked, "claimed_levels": claimed_levels, "claimed_goals": claimed_goals, "tutorial_step": tutorial_step, "tutorial_rewarded": tutorial_rewarded,
 	}
 	var temporary: String = path + ".tmp"
 	var file: FileAccess = FileAccess.open(temporary, FileAccess.WRITE)
@@ -384,6 +380,7 @@ func load_game(path: String = "user://kitchen_save.json") -> bool:
 	if parse_result != OK:
 		return false
 	var parsed: Variant = parser.data
+	if parsed is Dictionary and parsed.get("version") == 1: parsed = _migrate_v1(parsed)
 	if not parsed is Dictionary or not _validate_save(parsed):
 		return false
 	var data: Dictionary = parsed
@@ -409,6 +406,12 @@ func load_game(path: String = "user://kitchen_save.json") -> bool:
 	discovered.assign(data["discovered"])
 	_order_cursor = int(data["order_cursor"])
 	_next_order_id = int(data["next_order_id"])
+	inventory_capacity = int(data.inventory_capacity)
+	total_cooked = int(data.total_cooked)
+	claimed_levels.assign(data.claimed_levels.map(func(value): return int(value)))
+	claimed_goals.assign(data.claimed_goals)
+	tutorial_step = int(data.tutorial_step)
+	tutorial_rewarded = bool(data.tutorial_rewarded)
 	_rng.seed = int(data["rng_seed"])
 	_rng.state = int(data["rng_state"])
 	tick()
@@ -418,6 +421,7 @@ func load_game(path: String = "user://kitchen_save.json") -> bool:
 func _validate_save(data: Dictionary) -> bool:
 	if data.get("version") != SAVE_VERSION:
 		return false
+	if not _validate_expansion(data): return false
 	for key: String in ["energy", "coins", "stars", "gems", "xp", "boosts", "city_index", "daily_claimed_at", "total_merges", "total_orders", "order_cursor", "next_order_id"]:
 		if not _nonnegative_integer(data.get(key)):
 			return false
@@ -440,7 +444,7 @@ func _validate_save(data: Dictionary) -> bool:
 				return false
 		elif item != "" and item != "locked" and (not ITEMS.has(item) or ITEMS[item]["chain"] == "generator"):
 			return false
-	if not data.get("inventory") is Array or data["inventory"].size() > INVENTORY_MAX:
+	if not data.get("inventory") is Array or data["inventory"].size() > int(data.inventory_capacity):
 		return false
 	for item: Variant in data["inventory"]:
 		if not item is String or not ITEMS.has(item) or ITEMS[item]["chain"] == "generator":
@@ -512,8 +516,13 @@ func _make_order(item: String) -> Dictionary:
 	return result
 
 func _next_order_item() -> String:
-	var options: Array[String] = ["cherry", "toast", "carrot", str(CITIES[city_index]["signature"]), "smoothie", "bread", "salad", "strawberry", "soup", "ramen", "tropical", "macaron"]
-	var result: String = options[_order_cursor % options.size()]
+	# Only attainable, level-unlocked dishes enter the order pool.
+	var options: Array[String] = ["cherry", "carrot", "bread", "strawberry"]
+	for recipe in RECIPES:
+		if int(recipe.level) <= get_level(): options.append(recipe.out)
+	var signature: String = CITIES[city_index].signature
+	if int(get_recipe(signature).get("level", 1)) <= get_level(): options.append(signature)
+	var result: String = options[(_order_cursor + city_index * 3) % options.size()]
 	_order_cursor += 1
 	return result
 
@@ -532,3 +541,141 @@ func _commit(message: String) -> void:
 func _fail(message: String) -> bool:
 	feedback.emit(message)
 	return false
+
+func recipe_status(recipe: Dictionary) -> String:
+	if get_level() < int(recipe.level): return "Chef level %d" % int(recipe.level)
+	for job in jobs:
+		if job.station == recipe.station: return "Station busy"
+	if not board.has(recipe.input): return "Need %s" % ITEMS[recipe.input].name
+	if not str(recipe.extra).is_empty() and not board.has(recipe.extra): return "Also need %s" % ITEMS[recipe.extra].name
+	return ""
+
+func find_merge() -> Array[int]:
+	for i in board.size():
+		if not can_move(i) or str(ITEMS[board[i]].next).is_empty(): continue
+		for j in range(i + 1, board.size()):
+			if board[i] == board[j]: return [i, j]
+	return []
+
+func sell_item(index: int) -> bool:
+	if not can_move(index): return _fail("Choose a food item to sell.")
+	var value: int = int(ITEMS[board[index]].tier) * 2
+	board[index] = ""
+	coins += value
+	_commit("A little more space! +%d coins." % value)
+	return true
+
+func buy_supply(kind: String) -> bool:
+	var cost: int = {"energy": 120, "boost": 75, "storage": 250}.get(kind, 0)
+	if cost == 0: return false
+	if kind == "energy" and energy >= ENERGY_MAX: return _fail("Your energy is already full.")
+	if kind == "storage" and inventory_capacity >= 20: return _fail("Your pantry has all 20 slots.")
+	if coins < cost: return _fail("Serve a few more guests to earn %d coins." % cost)
+	coins -= cost
+	match kind:
+		"energy":
+			tick()
+			energy = mini(ENERGY_MAX, energy + 30)
+			if energy == ENERGY_MAX: energy_updated_at = Time.get_unix_time_from_system()
+		"boost": boosts += 3
+		"storage": inventory_capacity += 1
+	_commit("A little kitchen upgrade, just for you.")
+	return true
+
+func pending_level_rewards() -> int:
+	var count: int = 0
+	for level in range(2, get_level() + 1):
+		if not claimed_levels.has(level): count += 1
+	return count
+
+func claim_level_rewards() -> bool:
+	var count: int = pending_level_rewards()
+	if count == 0: return false
+	for level in range(2, get_level() + 1):
+		if claimed_levels.has(level): continue
+		coins += level * 25
+		energy = mini(ENERGY_MAX, energy + 10)
+		boosts += 1
+		claimed_levels.append(level)
+	if energy == ENERGY_MAX: energy_updated_at = Time.get_unix_time_from_system()
+	_commit("%d chef rewards claimed! Coins, energy, and boosts." % count)
+	return true
+
+func goal_progress(goal: Dictionary) -> int:
+	match str(goal.kind):
+		"merges": return total_merges
+		"orders": return total_orders
+		"cooked": return total_cooked
+		"discovered":
+			var foods: int = 0
+			for id in discovered:
+				if ITEMS[id].chain != "generator": foods += 1
+			return foods
+		"cities": return get_unlocked_city() + 1
+	return 0
+
+func claim_goal(id: String) -> bool:
+	if claimed_goals.has(id): return false
+	for goal in GOALS:
+		if goal.id != id: continue
+		if goal_progress(goal) < int(goal.target): return _fail("Keep going, chef. Every little step counts.")
+		claimed_goals.append(id)
+		coins += int(goal.coins)
+		stars += int(goal.stars)
+		_commit("%s! +%d coins, +%d stars." % [goal.title, int(goal.coins), int(goal.stars)])
+		return true
+	return false
+
+func start_tutorial() -> void:
+	tutorial_step = 1
+	_commit("")
+
+func skip_tutorial() -> void:
+	tutorial_step = 7
+	_commit("")
+
+func _tutorial_event(action: String) -> void:
+	var actions: Array[String] = ["", "generate", "merge", "cook", "collect", "serve", "renovate"]
+	if tutorial_step < 1 or tutorial_step >= 7 or actions[tutorial_step] != action: return
+	tutorial_step += 1
+	if tutorial_step == 7 and not tutorial_rewarded:
+		tutorial_rewarded = true
+		coins += 50
+		stars += 1
+		energy = mini(ENERGY_MAX, energy + 10)
+		if energy == ENERGY_MAX: energy_updated_at = Time.get_unix_time_from_system()
+	if tutorial_step == 7: tutorial_finished.emit()
+
+func _migrate_v1(old: Dictionary) -> Dictionary:
+	var data: Dictionary = old.duplicate(true)
+	if not data.get("renovations") is Dictionary: return data
+	for i in range(4, CITIES.size()): data.renovations[str(i)] = {}
+	data.version = SAVE_VERSION
+	data.inventory_capacity = 10
+	data.total_cooked = 0
+	data.claimed_levels = [1]
+	data.claimed_goals = []
+	# Returning players keep playing; the guide can be replayed from Help.
+	data.tutorial_step = 7
+	data.tutorial_rewarded = false
+	return data
+
+func _validate_expansion(data: Dictionary) -> bool:
+	for key in ["inventory_capacity", "total_cooked", "tutorial_step"]:
+		if not _nonnegative_integer(data.get(key)): return false
+	if int(data.inventory_capacity) < 10 or int(data.inventory_capacity) > 20 or int(data.tutorial_step) > 7: return false
+	if not data.get("tutorial_rewarded") is bool: return false
+	if not data.get("claimed_levels") is Array or not data.get("claimed_goals") is Array: return false
+	var levels: Array = []
+	for value in data.claimed_levels:
+		if not _nonnegative_integer(value) or int(value) < 1 or int(value) > MAX_LEVEL or levels.has(int(value)): return false
+		levels.append(int(value))
+	var goals: Array = []
+	for value in data.claimed_goals:
+		if not value is String or goals.has(value): return false
+		var known: bool = false
+		for goal in GOALS:
+			if goal.id == value: known = true
+		if not known: return false
+		goals.append(value)
+	return true

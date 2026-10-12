@@ -47,10 +47,10 @@ func _test_start_and_merge() -> void:
 	game.board[7] = "locked"
 	game.move_or_merge(13, 6)
 	expect(game.board[7] == "locked", "Neighbor clearing does not wrap across rows")
-	game.board[28] = "pineapple"
-	game.board[30] = "pineapple"
+	game.board[28] = "coconut"
+	game.board[30] = "coconut"
 	game.move_or_merge(28, 30)
-	expect(game.board[28] == "pineapple" and game.board[30] == "pineapple", "Maximum-tier ingredients never disappear")
+	expect(game.board[28] == "coconut" and game.board[30] == "coconut", "Maximum-tier ingredients never disappear")
 
 func _test_generation_and_storage() -> void:
 	var game = State.new()
@@ -83,7 +83,9 @@ func _test_recipes_and_orders() -> void:
 	var stations: Dictionary = {}
 	for recipe: Dictionary in State.RECIPES:
 		var game = State.new()
+		game.xp = 1900
 		game.board[3] = recipe["input"]
+		if not str(recipe.extra).is_empty(): game.board[6] = recipe.extra
 		expect(game.start_cooking(3, recipe["id"]), "Start recipe " + recipe["id"])
 		expect(game.board[3] == "" and game.jobs.size() == 1, "Cooking consumes ingredient exactly once")
 		expect(not game.collect_cooking(0), "Unfinished dish cannot be collected")
@@ -150,14 +152,14 @@ func _test_travel_and_renovation() -> void:
 	expect(not game.renovate("tables", "rose"), "Insufficient stars cannot renovate")
 	expect(game.renovate("floor", "sunshine") and game.stars == 0, "Owned detail can be recolored freely")
 	game.stars = 100
-	for city: int in range(4):
+	for city: int in range(State.CITIES.size()):
 		if city > 0:
 			expect(game.travel(city), "Travel to unlocked city %d" % city)
 		for part: String in State.PARTS:
 			if game.get_renovation(part).is_empty():
 				expect(game.renovate(part, "rose"), "Renovate %s in city %d" % [part, city])
-		expect(game.get_unlocked_city() == mini(city + 1, 3), "Completing room unlocks exactly the next chapter")
-	expect(not game.travel(4), "Travel cannot exceed four cities")
+		expect(game.get_unlocked_city() == mini(city + 1, State.CITIES.size()-1), "Completing room unlocks exactly the next chapter")
+	expect(not game.travel(State.CITIES.size()), "Travel cannot exceed eight cities")
 	expect(game.travel(0) and game.get_renovation("floor") == "sunshine", "Returning to city preserves its design")
 	game.energy = 70
 	expect(game.claim_daily(), "First daily gift is available")
